@@ -215,8 +215,19 @@
             object-position: center top;
             border-radius: 0.9rem;
             box-shadow: 0 10px 24px rgba(44, 62, 80, 0.16);
-            float: right;
-            margin: 0 0 1rem 1.25rem;
+            margin: 0;
+        }
+
+        .philosophy-content {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 150px;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        .philosophy-content .topic-list {
+            grid-column: 1 / -1;
+            grid-row: 2;
         }
 
         /* Topics List */
@@ -247,6 +258,7 @@
             .section-title { font-size: 2.2rem; }
             .glass-panel { padding: 2rem 1.5rem; }
             .hero-photo { min-height: 300px; margin-bottom: 1.5rem; }
+            .philosophy-content { grid-template-columns: minmax(0, 1fr) 120px; gap: 1rem; }
             .talk-photo { width: 120px; height: 155px; }
         }
     </style>
@@ -391,13 +403,15 @@
                     <div class="glass-panel h-100">
                         <span class="section-subtitle">Training & Leadership</span>
                         <h2 class="section-title serif mb-4">Core Philosophy</h2>
-                        <img class="talk-photo" src="imf/20cf713e-954a-4530-acdf-a9f42c27a5b1.jpeg" alt="Krista Staub presenting on stage">
-                        <ul class="topic-list">
-                            <li><i class="fa-regular fa-lightbulb"></i> <strong>Appreciative Inquiry:</strong> Strengths-based coaching to unlock massive potential.</li>
-                            <li><i class="fa-solid fa-shield-halved"></i> <strong>Imposter Syndrome:</strong> Rewrite narratives to show up with absolute confidence.</li>
-                            <li><i class="fa-solid fa-chart-line"></i> <strong>Efficiency & Productivity:</strong> Build productive routines that support consistent growth.</li>
-                            <li><i class="fa-solid fa-scale-balanced"></i> <strong>Business Growth:</strong> Habits that generate consistent, high-quality leads.</li>
-                        </ul>
+                        <div class="philosophy-content">
+                            <img class="talk-photo" src="imf/20cf713e-954a-4530-acdf-a9f42c27a5b1.jpeg" alt="Krista Staub presenting on stage">
+                            <ul class="topic-list">
+                                <li><i class="fa-regular fa-lightbulb"></i> <strong>Appreciative Inquiry:</strong> Strengths-based coaching to unlock massive potential.</li>
+                                <li><i class="fa-solid fa-shield-halved"></i> <strong>Imposter Syndrome:</strong> Rewrite narratives to show up with absolute confidence.</li>
+                                <li><i class="fa-solid fa-chart-line"></i> <strong>Efficiency & Productivity:</strong> Build productive routines that support consistent growth.</li>
+                                <li><i class="fa-solid fa-scale-balanced"></i> <strong>Business Growth:</strong> Habits that generate consistent, high-quality leads.</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 
