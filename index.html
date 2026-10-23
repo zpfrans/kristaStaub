@@ -188,6 +188,37 @@
         }
         .hero-title i { font-style: italic; color: var(--gold-primary); font-weight: 400; }
 
+        .hero-photo {
+            width: 100%;
+            height: 100%;
+            min-height: 430px;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 1.25rem;
+            box-shadow: 0 18px 40px rgba(44, 62, 80, 0.18);
+        }
+
+        .about-photo {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            object-position: center 20%;
+            border-radius: 1rem;
+            box-shadow: 0 12px 28px rgba(44, 62, 80, 0.16);
+            margin-bottom: 1.5rem;
+        }
+
+        .talk-photo {
+            width: 150px;
+            height: 190px;
+            object-fit: cover;
+            object-position: center top;
+            border-radius: 0.9rem;
+            box-shadow: 0 10px 24px rgba(44, 62, 80, 0.16);
+            float: right;
+            margin: 0 0 1rem 1.25rem;
+        }
+
         /* Topics List */
         .topic-list { list-style: none; padding: 0; }
         .topic-list li {
@@ -215,6 +246,8 @@
             .hero-title { font-size: 3rem; }
             .section-title { font-size: 2.2rem; }
             .glass-panel { padding: 2rem 1.5rem; }
+            .hero-photo { min-height: 300px; margin-bottom: 1.5rem; }
+            .talk-photo { width: 120px; height: 155px; }
         }
     </style>
 </head>
@@ -246,8 +279,10 @@
     <section class="hero">
         <div class="container">
             <div class="row">
-                <!-- Content centered to let 3D wrap around it -->
-                <div class="col-lg-8 mx-auto text-center gsap-reveal">
+                <div class="col-lg-5 mb-4 mb-lg-0 gsap-reveal">
+                    <img class="hero-photo" src="imf/4e8423cf-9869-42c1-999f-b0aee4a655f2.jpeg" alt="Krista Staub speaking to a room of real estate professionals">
+                </div>
+                <div class="col-lg-7 text-center d-flex align-items-center gsap-reveal">
                     <div class="glass-panel" style="padding: 4rem 2rem;">
                         <span class="section-subtitle">Real Estate Coach, Trainer & Leader</span>
                         <h1 class="hero-title serif">Build Real <i>Momentum</i> In Your Business.</h1>
@@ -272,6 +307,7 @@
                     <div class="col-lg-5 mb-5 mb-lg-0 pe-lg-5">
                         <span class="section-subtitle">Meet Krista</span>
                         <h2 class="section-title serif">Guiding Leaders to Growth</h2>
+                        <img class="about-photo" src="imf/679e5c95-de28-4e90-9013-53d4dfe3c59e.jpeg" alt="Professional portrait of Krista Staub">
                         <p class="text-muted mb-4" style="line-height: 1.8;">
                             Recognized for a direct coaching style, strategic clarity, and the ability to turn complexity into execution. I focus on long-term growth, leadership development, and building businesses that scale with integrity.
                         </p>
@@ -355,6 +391,7 @@
                     <div class="glass-panel h-100">
                         <span class="section-subtitle">Training & Leadership</span>
                         <h2 class="section-title serif mb-4">Core Philosophy</h2>
+                        <img class="talk-photo" src="imf/20cf713e-954a-4530-acdf-a9f42c27a5b1.jpeg" alt="Krista Staub presenting on stage">
                         <ul class="topic-list">
                             <li><i class="fa-regular fa-lightbulb"></i> <strong>Appreciative Inquiry:</strong> Strengths-based coaching to unlock massive potential.</li>
                             <li><i class="fa-solid fa-shield-halved"></i> <strong>Imposter Syndrome:</strong> Rewrite narratives to show up with absolute confidence.</li>
