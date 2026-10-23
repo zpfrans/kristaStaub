@@ -1,1243 +1,668 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Krista Staub offers coaching, training, and leadership development for real estate professionals.">
-  <title>Krista Staub | Coaching, Training & Leadership</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krista Staub | Real Estate Coaching & Leadership</title>
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
-        rel="stylesheet">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'] }
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <style>
+        /* CSS Variables for Light, Elegant Theme */
+        :root {
+            --text-dark: #2c3e50;
+            --text-muted: #5a6a7a;
+            --gold-primary: #d4af37;
+            --gold-light: #f4e8c1;
+            /* Updated for better text readability */
+            --glass-bg: rgba(255, 255, 255, 0.85); 
+            --glass-border: rgba(255, 255, 255, 1);
         }
-      }
-    };
-  </script>
 
-  <style>
-    :root {
-      --accent-1: #ec4899;
-      --accent-2: #f43f5e;
-      --accent-3: #f59e0b;
-      --blob-1: rgba(236, 72, 153, .24);
-      --blob-2: rgba(168, 85, 247, .24);
-      --blob-3: rgba(245, 158, 11, .20);
-    }
+        /* CRITICAL FIX: Fully transparent body/html so canvas shows through */
+        body, html {
+            margin: 0;
+            padding: 0;
+            background-color: transparent !important; 
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text-dark);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
 
-    [data-theme="cosmic"] {
-      --accent-1: #a855f7;
-      --accent-2: #6366f1;
-      --accent-3: #06b6d4;
-      --blob-1: rgba(168, 85, 247, .25);
-      --blob-2: rgba(99, 102, 241, .25);
-      --blob-3: rgba(6, 182, 212, .2);
-    }
+        h1, h2, h3, h4, h5, h6, .serif {
+            font-family: 'Playfair Display', serif;
+        }
 
-    [data-theme="emerald"] {
-      --accent-1: #10b981;
-      --accent-2: #14b8a6;
-      --accent-3: #06b6d4;
-      --blob-1: rgba(16, 185, 129, .23);
-      --blob-2: rgba(20, 184, 166, .22);
-      --blob-3: rgba(6, 182, 212, .2);
-    }
+        /* Add text shadows for extra contrast against the 3D background */
+        h1, h2, h3, h4, h5, h6, p, li, .navbar-brand, .nav-link {
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.9), 0 1px 1px rgba(0, 0, 0, 0.05);
+        }
 
-    * { box-sizing: border-box; }
+        .text-gold { color: var(--gold-primary); text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1); }
 
-    html { scroll-behavior: smooth; }
+        /* -----------------------------------
+           3D Canvas Container
+           (Fixed behind everything, high visibility)
+        ------------------------------------ */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1; 
+            pointer-events: none; /* Allows scrolling and clicking on HTML above */
+        }
 
-    body {
-      background: #0a0a0a;
-      color: white;
-      font-family: Inter, sans-serif;
-      overflow-x: hidden;
-    }
+        /* -----------------------------------
+           Glassmorphism UI Components
+           (Frosted glass to let 3D show through)
+        ------------------------------------ */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-radius: 1.5rem;
+            padding: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .theme-gradient-text {
-      background: linear-gradient(100deg, var(--accent-1), var(--accent-2), var(--accent-3));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 2rem;
+            height: 100%;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            /* Required for Vanilla Tilt inner 3d effect */
+            transform-style: preserve-3d;
+        }
 
-    .theme-gradient-bg {
-      background: linear-gradient(100deg, var(--accent-1), var(--accent-2), var(--accent-3));
-    }
+        .glass-card:hover {
+            box-shadow: 0 15px 30px rgba(212, 175, 55, 0.2);
+            background: rgba(255, 255, 255, 0.95);
+        }
 
-    .theme-border { border-color: var(--accent-1); }
+        /* Push inner elements of the card out during tilt */
+        .glass-card > * {
+            transform: translateZ(30px);
+        }
 
-    .glass {
-      background: rgba(15, 15, 15, .72);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,.1);
-    }
+        /* -----------------------------------
+           Layout & Typography
+        ------------------------------------ */
+        .section-padding { padding: 100px 0; }
+        
+        .section-subtitle {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--gold-primary);
+            font-weight: 600;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
 
-    .glass-card {
-      background: rgba(20,20,20,.65);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,.09);
-      transition: border-color .25s, transform .25s, box-shadow .25s;
-    }
+        .section-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 2rem;
+        }
 
-    .glass-card:hover {
-      border-color: var(--accent-1);
-      box-shadow: 0 0 25px var(--blob-1);
-      transform: translateY(-3px);
-    }
+        /* Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.85) !important;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 1);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark) !important;
+        }
+        .nav-link {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dark) !important;
+            font-weight: 600;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+        }
+        .nav-link:hover { color: var(--gold-primary) !important; }
 
-    .blob {
-      position: fixed;
-      z-index: -1;
-      border-radius: 50%;
-      filter: blur(100px);
-      pointer-events: none;
-      animation: float 14s infinite alternate ease-in-out;
-    }
+        /* Buttons */
+        .btn-gold {
+            background: linear-gradient(135deg, #d4af37, #b5952f);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-gold:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+            color: white;
+        }
 
-    .blob.one {
-      width: 45vw;
-      height: 45vw;
-      top: -12%;
-      left: -12%;
-      background: var(--blob-1);
-    }
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 80px;
+        }
+        .hero-title {
+            font-size: 4.5rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+        .hero-title i { font-style: italic; color: var(--gold-primary); font-weight: 400; }
 
-    .blob.two {
-      width: 40vw;
-      height: 40vw;
-      top: 35%;
-      right: -12%;
-      background: var(--blob-2);
-      animation-delay: 2s;
-    }
+        /* Topics List */
+        .topic-list { list-style: none; padding: 0; }
+        .topic-list li {
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+        }
+        .topic-list li i { color: var(--gold-primary); margin-right: 15px; font-size: 1.3rem; }
 
-    .blob.three {
-      width: 50vw;
-      height: 50vw;
-      bottom: -20%;
-      left: 20%;
-      background: var(--blob-3);
-      animation-delay: 4s;
-    }
+        /* Footer */
+        footer {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 1);
+            padding: 60px 0 30px;
+            box-shadow: 0 -4px 15px rgba(0,0,0,0.05);
+        }
 
-    @keyframes float {
-      from { transform: translate(0, 0) scale(1); }
-      to { transform: translate(25px, -30px) scale(1.08); }
-    }
+        /* GSAP Initial State */
+        .gsap-reveal { opacity: 0; transform: translateY(40px); }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .nav-section { display: none; }
-
-    .nav-section.active {
-      display: block;
-      animation: fadeIn .35s ease-out;
-    }
-
-    .nav-btn.selected {
-      background: linear-gradient(100deg, var(--accent-1), var(--accent-2));
-      color: white;
-      font-weight: 800;
-    }
-
-    .range-slider {
-      appearance: none;
-      width: 100%;
-      height: 6px;
-      border-radius: 10px;
-      background: #333;
-      cursor: ew-resize;
-    }
-
-    .range-slider::-webkit-slider-thumb {
-      appearance: none;
-      width: 19px;
-      height: 19px;
-      border-radius: 50%;
-      background: white;
-      box-shadow: 0 0 10px rgba(255,255,255,.3);
-    }
-
-    input, textarea {
-      color-scheme: dark;
-    }
-
-    .faq-answer { display: none; }
-    .faq-item.open .faq-answer { display: block; }
-
-    @media (max-width: 768px) {
-      .blob { filter: blur(65px); }
-    }
-  </style>
+        @media (max-width: 768px) {
+            .hero-title { font-size: 3rem; }
+            .section-title { font-size: 2.2rem; }
+            .glass-panel { padding: 2rem 1.5rem; }
+        }
+    </style>
 </head>
+<body>
 
-<body data-theme="vibrant">
+    <!-- 3D HIGH-VISIBILITY CANVAS BACKGROUND -->
+    <div id="canvas-container"></div>
 
-  <div class="blob one"></div>
-  <div class="blob two"></div>
-  <div class="blob three"></div>
-
-  <!-- Notification -->
-  <div id="toast"
-       class="hidden fixed top-24 left-1/2 -translate-x-1/2 z-[100]
-              theme-gradient-bg rounded-full px-6 py-3 text-xs font-bold shadow-2xl">
-    <i class="fa-solid fa-sparkles mr-2"></i>
-    <span id="toast-message">Welcome!</span>
-  </div>
-
-  <!-- Header -->
-  <header class="sticky top-0 z-40 glass border-b border-white/10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20
-                flex items-center justify-between gap-4">
-
-      <button class="flex items-center gap-3 text-left"
-              onclick="navigate('home')">
-        <div class="w-11 h-11 rounded-2xl theme-gradient-bg p-[2px]">
-          <div class="w-full h-full rounded-[14px] bg-neutral-950
-                      flex items-center justify-center">
-            <span class="font-black theme-gradient-text text-lg">KS</span>
-          </div>
-        </div>
-        <span>
-          <strong class="block text-sm">Krista Staub</strong>
-          <small class="text-neutral-400 text-[10px]">
-            Coaching · Training · Leadership
-          </small>
-        </span>
-      </button>
-
-      <nav class="hidden xl:flex items-center gap-1 bg-white/5
-                  border border-white/10 p-1.5 rounded-full">
-        <button class="nav-btn px-3 py-2 text-xs rounded-full"
-                data-target="home" onclick="navigate('home')">Home</button>
-        <button class="nav-btn px-3 py-2 text-xs rounded-full"
-                data-target="about" onclick="navigate('about')">Meet Krista</button>
-        <button class="nav-btn px-3 py-2 text-xs rounded-full"
-                data-target="coaching" onclick="navigate('coaching')">Coaching</button>
-        <button class="nav-btn px-3 py-2 text-xs rounded-full"
-                data-target="training" onclick="navigate('training')">Training</button>
-        <button class="nav-btn px-3 py-2 text-xs rounded-full"
-                data-target="resources" onclick="navigate('resources')">Resources</button>
-        <button class="nav-btn px-3 py-2 text-xs rounded-full"
-                data-target="events" onclick="navigate('events')">Events</button>
-      </nav>
-
-      <div class="flex gap-2">
-        <button onclick="toggleTheme()"
-                class="w-10 h-10 rounded-full bg-white/5 border border-white/10"
-                title="Change color theme">
-          <i class="fa-solid fa-palette text-amber-300"></i>
-        </button>
-        <button onclick="navigate('contact')"
-                class="hidden sm:inline-flex items-center gap-2
-                       rounded-full px-4 py-2 theme-gradient-bg
-                       text-white text-xs font-bold">
-          Connect <i class="fa-solid fa-arrow-right"></i>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <main class="relative z-10 pb-24 lg:pb-10">
-
-    <!-- HOME -->
-    <section id="home"
-             class="nav-section max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-20">
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-        <div class="lg:col-span-7 space-y-6">
-
-          <span class="inline-flex items-center gap-2 glass rounded-full
-                       px-4 py-2 text-xs font-bold uppercase tracking-widest">
-            <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
-            <span class="theme-gradient-text">Coaching · Training · Leadership</span>
-          </span>
-
-          <h1 class="text-4xl sm:text-6xl xl:text-7xl
-                     font-black leading-[1.08] tracking-tight">
-            Build <span class="theme-gradient-text">Real Momentum</span>
-            in Your Business.
-          </h1>
-
-          <p class="text-neutral-300 leading-relaxed max-w-2xl">
-            I'm Krista Staub. I empower real estate professionals, coaches,
-            and leaders with the clarity, strategy, and accountability to
-            think bigger, lead better, and grow faster.
-          </p>
-
-          <p class="text-sm text-neutral-400 leading-relaxed max-w-2xl">
-            Build strong habits, smart systems, and practical plans that
-            turn your goals into consistent action and lasting success.
-          </p>
-
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="glass-card rounded-2xl p-4">
-              <div class="text-2xl font-black theme-gradient-text">1999</div>
-              <p class="text-xs text-neutral-300 mt-1">Career Started</p>
-            </div>
-            <div class="glass-card rounded-2xl p-4">
-              <div class="text-2xl font-black theme-gradient-text">2011</div>
-              <p class="text-xs text-neutral-300 mt-1">Keller Williams</p>
-            </div>
-            <div class="glass-card rounded-2xl p-4">
-              <div class="text-2xl font-black theme-gradient-text">2019</div>
-              <p class="text-xs text-neutral-300 mt-1">MAPS Coaching</p>
-            </div>
-            <div class="glass-card rounded-2xl p-4">
-              <div class="text-xl font-black theme-gradient-text">3 Markets</div>
-              <p class="text-xs text-neutral-300 mt-1">US · Portugal · Canada</p>
-            </div>
-          </div>
-
-          <div class="flex flex-wrap gap-3 pt-2">
-            <button onclick="navigate('contact')"
-                    class="theme-gradient-bg rounded-2xl px-6 py-4
-                           font-bold text-sm shadow-xl">
-              Connect With Krista
-              <i class="fa-solid fa-arrow-right ml-2"></i>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand serif" href="#">Krista <span class="text-gold">Staub</span></a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fa-solid fa-bars text-gold fs-4"></i>
             </button>
-            <button onclick="navigate('coaching')"
-                    class="rounded-2xl px-6 py-4 bg-white/5 border
-                           border-white/10 font-bold text-sm">
-              Explore Coaching
-            </button>
-          </div>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#programs">Programs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#topics">Topics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#testimonials">Testimonials</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#events">Events</a></li>
+                </ul>
+            </div>
         </div>
+    </nav>
 
-        <!-- Profile -->
-        <div class="lg:col-span-5 max-w-md w-full mx-auto">
-          <div class="glass-card rounded-3xl p-6 space-y-6">
-            <div class="flex items-center gap-4">
-              <img src="krista-staub.jpg"
-                   alt="Krista Staub"
-                   class="w-24 h-32 rounded-2xl object-cover object-top
-                          border-2 theme-border shadow-xl">
-
-              <div>
-                <h2 class="text-lg font-bold">Krista Staub</h2>
-                <p class="text-sm text-pink-300 mt-1">
-                  Real Estate Coach, Trainer & Leader
-                </p>
-                <span class="inline-block mt-3 text-[10px] font-bold
-                             text-emerald-300 bg-emerald-400/10
-                             border border-emerald-400/30
-                             rounded-full px-3 py-1">
-                  STRATEGY + ACCOUNTABILITY
-                </span>
-              </div>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="row">
+                <!-- Content centered to let 3D wrap around it -->
+                <div class="col-lg-8 mx-auto text-center gsap-reveal">
+                    <div class="glass-panel" style="padding: 4rem 2rem;">
+                        <span class="section-subtitle">Real Estate Coach, Trainer & Leader</span>
+                        <h1 class="hero-title serif">Build Real <i>Momentum</i> In Your Business.</h1>
+                        <p class="lead text-muted mb-4 mx-auto" style="line-height: 1.8; font-size: 1.1rem; max-width: 600px;">
+                            Empowering leaders and real estate professionals with the clarity, strategy, and accountability to think bigger, lead better, and grow faster.
+                        </p>
+                        <div class="d-flex justify-content-center gap-3 flex-wrap mt-4">
+                            <a href="#programs" class="btn-gold text-decoration-none">Explore Coaching</a>
+                            <a href="#about" class="btn btn-outline-dark rounded-pill px-4" style="text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Read My Story</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div class="bg-black/40 rounded-2xl p-5 border border-white/5">
-              <div class="flex justify-between gap-3 text-xs">
-                <span class="font-semibold">Clarity creates momentum</span>
-                <span class="text-emerald-300">Growth mindset</span>
-              </div>
-              <div class="h-2 rounded-full bg-neutral-800 mt-3 overflow-hidden">
-                <div class="theme-gradient-bg h-full rounded-full"
-                     style="width:88%"></div>
-              </div>
-              <p class="text-xs text-neutral-400 mt-4 leading-relaxed">
-                Focused coaching. Practical systems. Consistent execution.
-              </p>
-            </div>
-
-            <div class="flex flex-wrap gap-2 text-xs">
-              <span class="rounded-full bg-white/5 border border-white/10 px-3 py-2">Strategic Clarity</span>
-              <span class="rounded-full bg-white/5 border border-white/10 px-3 py-2">Leadership</span>
-              <span class="rounded-full bg-white/5 border border-white/10 px-3 py-2">Accountability</span>
-            </div>
-          </div>
         </div>
-      </div>
-
-      <!-- Before and after slider -->
-      <div class="glass rounded-3xl p-6 sm:p-10 space-y-6">
-        <div>
-          <span class="text-xs font-bold theme-gradient-text uppercase tracking-widest">
-            Clarity Creates Momentum
-          </span>
-          <h2 class="text-2xl sm:text-3xl font-black mt-2">
-            From Overwhelmed to Intentional
-          </h2>
-          <p class="text-sm text-neutral-400 mt-2">
-            Move the slider to explore the shift intentional coaching can support.
-          </p>
-        </div>
-
-        <div id="comparison"
-             class="relative h-80 sm:h-96 rounded-2xl overflow-hidden
-                    border border-white/10 select-none">
-          <div class="absolute inset-0 bg-neutral-900 p-6 sm:p-8
-                      flex flex-col justify-between text-right">
-            <span class="self-end text-xs text-emerald-300 font-bold
-                         bg-emerald-400/10 border border-emerald-400/30
-                         rounded-full px-3 py-2">AFTER: MOMENTUM</span>
-            <div class="ml-auto max-w-md">
-              <p class="text-xs text-emerald-300 font-bold mb-3">
-                CLARITY · CONSISTENCY · ACCOUNTABILITY
-              </p>
-              <h3 class="text-2xl font-black">
-                Confident Decisions. Consistent Execution.
-              </h3>
-              <p class="text-sm text-neutral-300 mt-3">
-                Clear priorities, actionable plans, and habits that
-                help progress keep moving forward.
-              </p>
-            </div>
-          </div>
-
-          <div id="comparison-before"
-               class="absolute inset-y-0 left-0 bg-neutral-950
-                      border-r-2 theme-border p-6 sm:p-8
-                      flex flex-col justify-between overflow-hidden"
-               style="width:50%">
-            <span class="self-start text-xs text-rose-300 font-bold
-                         bg-rose-400/10 border border-rose-400/30
-                         rounded-full px-3 py-2 whitespace-nowrap">
-              BEFORE: STUCK
-            </span>
-            <div class="max-w-sm min-w-[230px]">
-              <p class="text-xs text-rose-300 font-bold mb-3">
-                SCATTERED FOCUS · UNCLEAR NEXT STEPS
-              </p>
-              <h3 class="text-2xl font-black">
-                Too Many Priorities. Not Enough Progress.
-              </h3>
-              <p class="text-sm text-neutral-400 mt-3">
-                A business can feel busy without a clear plan,
-                consistent habits, or the right accountability.
-              </p>
-            </div>
-          </div>
-
-          <div id="comparison-handle"
-               class="absolute top-0 bottom-0 w-1 theme-gradient-bg
-                      flex items-center justify-center"
-               style="left:50%; transform:translateX(-50%)">
-            <div class="w-10 h-10 bg-white text-neutral-900
-                        rounded-full shadow-xl flex items-center justify-center">
-              <i class="fa-solid fa-arrows-left-right"></i>
-            </div>
-          </div>
-        </div>
-
-        <input id="comparison-range" type="range" min="0" max="100"
-               value="50" class="range-slider" aria-label="Before and after comparison">
-      </div>
-
-      <!-- International reach -->
-      <div class="glass rounded-3xl p-6 sm:p-8">
-        <span class="text-xs font-bold text-emerald-300 uppercase tracking-widest">
-          <i class="fa-solid fa-globe mr-1"></i> International Coaching Reach
-        </span>
-        <h2 class="text-2xl font-black mt-2">Connecting Across Markets</h2>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-          <div class="glass-card rounded-2xl p-4">
-            <p class="text-xs text-neutral-400">United States</p>
-            <p class="font-bold mt-2">Real Estate Coaching</p>
-          </div>
-          <div class="glass-card rounded-2xl p-4">
-            <p class="text-xs text-neutral-400">Portugal</p>
-            <p class="font-bold mt-2">International Reach</p>
-          </div>
-          <div class="glass-card rounded-2xl p-4">
-            <p class="text-xs text-neutral-400">Canada</p>
-            <p class="font-bold mt-2">Coach Development</p>
-          </div>
-          <div class="glass-card rounded-2xl p-4">
-            <p class="text-xs text-neutral-400">Coaching Principle</p>
-            <p class="font-bold mt-2">Growth with Integrity</p>
-          </div>
-        </div>
-      </div>
     </section>
 
-    <!-- ABOUT KRISTA -->
-    <section id="about"
-             class="nav-section max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-10">
-
-      <div>
-        <span class="text-xs font-bold theme-gradient-text uppercase tracking-widest">
-          Meet Your Coach
-        </span>
-        <h2 class="text-3xl sm:text-5xl font-black mt-2">
-          Experience, Coaching & Leadership
-        </h2>
-      </div>
-
-      <div class="glass rounded-3xl p-6 sm:p-8 space-y-4">
-        <h3 class="text-2xl font-black">Hey there, I'm Krista.</h3>
-
-        <p class="text-neutral-300 leading-relaxed">
-          I began my real estate career in St. Louis, Missouri, in 1999,
-          earning Rookie of the Year honors before moving into leadership
-          and talent development. As Director of Career Development and
-          Training, I built recruiting and performance systems to attract,
-          develop, and retain talent across multiple brokerages.
-        </p>
-
-        <p class="text-neutral-300 leading-relaxed">
-          I joined Keller Williams in 2011 and became part of its leadership
-          team in 2012. My roles included Team Leader, Productivity Coach,
-          and Director of Production, and I also invested in Keller Williams
-          market centers.
-        </p>
-
-        <p class="text-neutral-300 leading-relaxed">
-          In 2019, I joined MAPS Coaching, expanding my work with real estate
-          producers and coaches across the United States, Portugal, and Canada.
-        </p>
-
-        <p class="text-neutral-300 leading-relaxed">
-          My approach is direct and practical: strategic clarity, thoughtful
-          questions, accountability, and execution that supports long-term
-          growth and leadership with integrity.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <article class="glass-card rounded-3xl p-6">
-          <span class="text-xs theme-gradient-text font-bold">2019 – PRESENT</span>
-          <h3 class="text-xl font-black mt-2">MAPS Coaching</h3>
-          <p class="text-sm text-neutral-300 mt-2">
-            Coaches real estate producers and Productivity Coaches;
-            leads Productivity Summits, executive masterminds, and
-            leadership training.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <span class="text-xs theme-gradient-text font-bold">2011 – 2019</span>
-          <h3 class="text-xl font-black mt-2">Keller Williams Leadership</h3>
-          <p class="text-sm text-neutral-300 mt-2">
-            Team Leader, Productivity Coach, and Director of Production,
-            supporting recruiting, agent growth, and market-center development.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <span class="text-xs theme-gradient-text font-bold">1999 – 2011</span>
-          <h3 class="text-xl font-black mt-2">Real Estate & Career Development</h3>
-          <p class="text-sm text-neutral-300 mt-2">
-            Began her real estate career in St. Louis and advanced into
-            career development, recruiting, training, and talent leadership.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <span class="text-xs theme-gradient-text font-bold">CORE EXPERTISE</span>
-          <h3 class="text-xl font-black mt-2">Leadership Through Execution</h3>
-          <ul class="text-sm text-neutral-300 mt-3 space-y-2">
-            <li><i class="fa-solid fa-check text-emerald-300 mr-2"></i>Strategic coaching</li>
-            <li><i class="fa-solid fa-check text-emerald-300 mr-2"></i>Productivity and accountability</li>
-            <li><i class="fa-solid fa-check text-emerald-300 mr-2"></i>Recruiting and talent development</li>
-            <li><i class="fa-solid fa-check text-emerald-300 mr-2"></i>Leadership training</li>
-          </ul>
-        </article>
-      </div>
-    </section>
-
-    <!-- COACHING PROGRAMS AND TESTIMONIALS -->
-    <section id="coaching"
-             class="nav-section max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-10">
-
-      <div class="text-center">
-        <span class="text-xs font-bold theme-gradient-text uppercase tracking-widest">
-          Coaching & Development
-        </span>
-        <h2 class="text-3xl sm:text-5xl font-black mt-2">
-          More Opportunities to Learn & Grow
-        </h2>
-        <p class="text-neutral-400 mt-3 max-w-2xl mx-auto">
-          Build confidence, grow your skills, and create a business
-          that grows with you.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-
-        <article class="glass-card rounded-3xl p-6">
-          <div class="w-12 h-12 rounded-2xl theme-gradient-bg
-                      flex items-center justify-center text-xl">
-            <i class="fa-solid fa-user-tie"></i>
-          </div>
-          <h3 class="text-xl font-black mt-5">1-on-1 Coaching</h3>
-          <p class="text-sm text-neutral-300 leading-relaxed mt-3">
-            Personalized coaching built around your goals, strengths,
-            and vision. Gain clarity, build effective strategies,
-            strengthen accountability, and create a focused plan for
-            consistent growth and measurable results.
-          </p>
-          <button onclick="navigate('contact')"
-                  class="mt-5 text-sm font-bold theme-gradient-text">
-            Connect with Krista <i class="fa-solid fa-arrow-right ml-1"></i>
-          </button>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <div class="w-12 h-12 rounded-2xl theme-gradient-bg
-                      flex items-center justify-center text-xl">
-            <i class="fa-solid fa-people-group"></i>
-          </div>
-          <h3 class="text-xl font-black mt-5">Group Training Programs</h3>
-          <p class="text-sm text-neutral-300 leading-relaxed mt-3">
-            Grow alongside like-minded professionals through shared
-            insights, collaborative problem-solving, and guided discussions.
-            Build skills, gain fresh perspectives, and stay accountable.
-          </p>
-          <button onclick="navigate('contact')"
-                  class="mt-5 text-sm font-bold theme-gradient-text">
-            Learn More <i class="fa-solid fa-arrow-right ml-1"></i>
-          </button>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <div class="w-12 h-12 rounded-2xl theme-gradient-bg
-                      flex items-center justify-center text-xl">
-            <i class="fa-solid fa-chalkboard-user"></i>
-          </div>
-          <h3 class="text-xl font-black mt-5">Trainings & Workshops</h3>
-          <p class="text-sm text-neutral-300 leading-relaxed mt-3">
-            Practical, skill-building sessions that turn knowledge into
-            action. Learn useful tools and proven strategies to improve
-            performance, develop leadership, and grow your business.
-          </p>
-          <button onclick="navigate('training')"
-                  class="mt-5 text-sm font-bold theme-gradient-text">
-            Explore Topics <i class="fa-solid fa-arrow-right ml-1"></i>
-          </button>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6 md:col-span-2 xl:col-span-3">
-          <div class="flex flex-col md:flex-row gap-5 md:items-center">
-            <div class="w-12 h-12 shrink-0 rounded-2xl theme-gradient-bg
-                        flex items-center justify-center text-xl">
-              <i class="fa-solid fa-bullseye"></i>
+    <!-- About / Biography -->
+    <section id="about" class="section-padding">
+        <div class="container">
+            <div class="glass-panel gsap-reveal">
+                <div class="row align-items-center">
+                    <div class="col-lg-5 mb-5 mb-lg-0 pe-lg-5">
+                        <span class="section-subtitle">Meet Krista</span>
+                        <h2 class="section-title serif">Guiding Leaders to Growth</h2>
+                        <p class="text-muted mb-4" style="line-height: 1.8;">
+                            Recognized for a direct coaching style, strategic clarity, and the ability to turn complexity into execution. I focus on long-term growth, leadership development, and building businesses that scale with integrity.
+                        </p>
+                    </div>
+                    <div class="col-lg-7 ps-lg-5 border-start border-white border-2">
+                        <div class="d-flex mb-4 align-items-start">
+                            <h3 class="serif text-gold me-4 mb-0" style="font-size: 2.2rem; min-width: 80px;">1999</h3>
+                            <div>
+                                <h5 class="fw-bold mb-1">Real Estate Beginnings</h5>
+                                <p class="text-muted small mb-0">Started in St. Louis, earning Rookie of the Year. Transitioned to leadership as Director of Career Development, building strong recruiting systems.</p>
+                            </div>
+                        </div>
+                        <div class="d-flex mb-4 align-items-start">
+                            <h3 class="serif text-gold me-4 mb-0" style="font-size: 2.2rem; min-width: 80px;">2011</h3>
+                            <div>
+                                <h5 class="fw-bold mb-1">Keller Williams Leadership</h5>
+                                <p class="text-muted small mb-0">Served as Team Leader, Productivity Coach, and Director of Production. Drove massive performance through structured accountability and culture.</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <h3 class="serif text-gold me-4 mb-0" style="font-size: 2.2rem; min-width: 80px;">2019</h3>
+                            <div>
+                                <h5 class="fw-bold mb-1">MAPS Coaching</h5>
+                                <p class="text-muted small mb-0">Expanding impact across the US, Portugal, and Canada. Coaching elite producers, leading Productivity Summits, and executive masterminds.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div>
-              <h3 class="text-xl font-black">Impact 90</h3>
-              <p class="text-sm text-neutral-300 leading-relaxed mt-2">
-                A 90-day accountability experience focused on mindset,
-                tracking, consistency, and daily execution. Develop strong
-                habits and build a practical plan for continued growth.
-              </p>
-            </div>
-            <button onclick="navigate('contact')"
-                    class="shrink-0 rounded-xl theme-gradient-bg px-5 py-3 text-sm font-bold">
-              Ask About Coaching
-            </button>
-          </div>
-        </article>
-      </div>
-
-      <div class="pt-8 space-y-6">
-        <div class="text-center">
-          <span class="text-xs font-bold theme-gradient-text uppercase tracking-widest">
-            What Clients Say
-          </span>
-          <h3 class="text-2xl sm:text-4xl font-black mt-2">
-            Growth You Can Feel in Your Work
-          </h3>
         </div>
+    </section>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <article class="glass-card rounded-3xl p-6">
-            <div class="text-amber-300 mb-3">★★★★★</div>
-            <p class="text-sm text-neutral-200 leading-relaxed">
-              “With the proper mindset and accountability, over 90 days
-              I built the muscle of consistency in my daily routine.
-              I tracked my numbers consistently for ALL 90 days!”
-            </p>
-            <p class="text-sm font-bold mt-5">Courtney Callahan</p>
-            <p class="text-xs text-neutral-400 mt-1">Impact 90 participant</p>
-          </article>
-
-          <article class="glass-card rounded-3xl p-6">
-            <div class="text-amber-300 mb-3">★★★★★</div>
-            <p class="text-sm text-neutral-200 leading-relaxed">
-              “It has changed the way I coach exponentially, and it
-              really is all because of these questions.”
-            </p>
-            <p class="text-sm font-bold mt-5">Amy Greenstein Zimney</p>
-            <p class="text-xs text-neutral-400 mt-1">Coach development participant</p>
-          </article>
-
-          <article class="glass-card rounded-3xl p-6">
-            <div class="text-amber-300 mb-3">★★★★★</div>
-            <p class="text-sm text-neutral-200 leading-relaxed">
-              “Learning how to dig deep with those questions has helped
-              me tremendously as a listing agent, as a buyer's agent,
-              as a recruiter, and as a coach.”
-            </p>
-            <p class="text-sm font-bold mt-5">Richard Chung</p>
-            <p class="text-xs text-neutral-400 mt-1">Real estate professional</p>
-          </article>
-
-          <article class="glass-card rounded-3xl p-6">
-            <div class="text-amber-300 mb-3">★★★★★</div>
-            <p class="text-sm text-neutral-200 leading-relaxed">
-              “I'm new in KW, and I'm having a lot of support from my
-              two coaches, which gets extra support through Krista.
-              It's been life changing.”
-            </p>
-            <p class="text-sm font-bold mt-5">Louiza</p>
-            <p class="text-xs text-neutral-400 mt-1">Coaching participant</p>
-          </article>
+    <!-- Programs & Coaching -->
+    <section id="programs" class="section-padding">
+        <div class="container">
+            <div class="text-center mb-5 gsap-reveal">
+                <span class="section-subtitle">Opportunities to Learn</span>
+                <h2 class="section-title serif">Coaching & Development</h2>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3 gsap-reveal">
+                    <!-- vanilla-tilt classes applied -->
+                    <div class="glass-card text-center" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.3">
+                        <i class="fa-solid fa-user-tie fs-1 text-gold mb-3"></i>
+                        <h4 class="serif fw-bold mb-3">1-on-1 Coaching</h4>
+                        <p class="text-muted small">Personalized guidance designed around your goals. Gain clarity, strategy, and strong accountability for consistent growth.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 gsap-reveal">
+                    <div class="glass-card text-center" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.3">
+                        <i class="fa-solid fa-users-viewfinder fs-1 text-gold mb-3"></i>
+                        <h4 class="serif fw-bold mb-3">Group Training</h4>
+                        <p class="text-muted small">Grow alongside driven professionals through shared insights, collaborative problem-solving, and collective momentum.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 gsap-reveal">
+                    <div class="glass-card text-center" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.3">
+                        <i class="fa-solid fa-chalkboard-user fs-1 text-gold mb-3"></i>
+                        <h4 class="serif fw-bold mb-3">Workshops</h4>
+                        <p class="text-muted small">Practical, skill-building sessions that turn knowledge into immediate action for performance and leadership improvement.</p>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3 gsap-reveal">
+                    <div class="glass-card text-center" data-tilt data-tilt-max="15" data-tilt-speed="400" data-tilt-glare data-tilt-max-glare="0.3" style="border: 2px solid var(--gold-primary);">
+                        <i class="fa-solid fa-bolt fs-1 text-gold mb-3"></i>
+                        <h4 class="serif fw-bold mb-3">Impact 90</h4>
+                        <p class="text-muted small">A rigorous 90-day accountability experience focused on mindset, tracking, consistency, and daily focused execution.</p>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </section>
 
-    <!-- TRAINING TOPICS -->
-    <section id="training"
-             class="nav-section max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-10">
-
-      <div>
-        <span class="text-xs font-bold theme-gradient-text uppercase tracking-widest">
-          Learn, Practice, Grow
-        </span>
-        <h2 class="text-3xl sm:text-5xl font-black mt-2">
-          Training & Leadership Topics
-        </h2>
-        <p class="text-neutral-400 mt-3 max-w-2xl">
-          Practical learning to strengthen your mindset, improve
-          performance, and help you lead with clarity.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <article class="glass-card rounded-3xl p-6">
-          <span class="text-2xl">💡</span>
-          <h3 class="text-xl font-black mt-4">Appreciative Inquiry</h3>
-          <p class="text-sm text-neutral-300 leading-relaxed mt-3">
-            Leverage strengths-based coaching to unlock potential in
-            yourself and those you lead. Focus on what's working to
-            create momentum and results.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <span class="text-2xl">🧠</span>
-          <h3 class="text-xl font-black mt-4">Imposter Syndrome</h3>
-          <p class="text-sm text-neutral-300 leading-relaxed mt-3">
-            Explore how limiting stories affect confidence and learn
-            ways to rewrite the narrative so you can show up with
-            greater clarity and self-belief.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <span class="text-2xl">🚀</span>
-          <h3 class="text-xl font-black mt-4">Efficiency & Productivity</h3>
-          <p class="text-sm text-neutral-300 leading-relaxed mt-3">
-            Improve daily systems, choose clear priorities, and build
-            productive routines that support consistent action.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <span class="text-2xl">📈</span>
-          <h3 class="text-xl font-black mt-4">Business Growth & Lead Generation</h3>
-          <p class="text-sm text-neutral-300 leading-relaxed mt-3">
-            Strengthen your business development habits and build a
-            repeatable approach to creating opportunities.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <span class="text-2xl">✅</span>
-          <h3 class="text-xl font-black mt-4">Consistency & Accountability</h3>
-          <p class="text-sm text-neutral-300 leading-relaxed mt-3">
-            Turn goals into measurable daily actions, track progress,
-            and stay accountable throughout your growth journey.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <span class="text-2xl">⚖️</span>
-          <h3 class="text-xl font-black mt-4">Compliance & Professionalism</h3>
-          <p class="text-sm text-neutral-300 leading-relaxed mt-3">
-            Build professional habits and a structured approach to
-            business performance, leadership, and client service.
-          </p>
-        </article>
-      </div>
-
-      <div class="text-center">
-        <button onclick="navigate('contact')"
-                class="theme-gradient-bg rounded-2xl px-7 py-4 text-sm font-bold">
-          Ask About Training
-          <i class="fa-solid fa-arrow-right ml-2"></i>
-        </button>
-      </div>
-    </section>
-
-    <!-- RESOURCES -->
-    <section id="resources"
-             class="nav-section max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-10">
-
-      <div class="text-center">
-        <span class="text-xs font-bold theme-gradient-text uppercase tracking-widest">
-          Helpful Tools
-        </span>
-        <h2 class="text-3xl sm:text-5xl font-black mt-2">
-          Shortcuts & Resources
-        </h2>
-        <p class="text-neutral-400 mt-3">
-          The best tools at your fingertips—get ahead faster.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-        <article class="glass-card rounded-3xl p-6">
-          <i class="fa-solid fa-bolt text-2xl text-amber-300"></i>
-          <h3 class="text-lg font-black mt-4">Efficiency & Productivity</h3>
-          <p class="text-sm text-neutral-400 mt-2">
-            Organize priorities, build routines, and manage your time.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <i class="fa-solid fa-book-open text-2xl text-cyan-300"></i>
-          <h3 class="text-lg font-black mt-4">Knowledge & Skill Development</h3>
-          <p class="text-sm text-neutral-400 mt-2">
-            Continue learning, practice useful skills, and build confidence.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <i class="fa-solid fa-chart-line text-2xl text-emerald-300"></i>
-          <h3 class="text-lg font-black mt-4">Business Growth</h3>
-          <p class="text-sm text-neutral-400 mt-2">
-            Develop repeatable habits for lead generation and opportunity creation.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <i class="fa-solid fa-list-check text-2xl text-pink-300"></i>
-          <h3 class="text-lg font-black mt-4">Consistency & Accountability</h3>
-          <p class="text-sm text-neutral-400 mt-2">
-            Set intentions, track progress, and make meaningful daily progress.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <i class="fa-solid fa-scale-balanced text-2xl text-purple-300"></i>
-          <h3 class="text-lg font-black mt-4">Compliance & Professionalism</h3>
-          <p class="text-sm text-neutral-400 mt-2">
-            Support professional conduct and reliable business practices.
-          </p>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6">
-          <i class="fa-solid fa-users text-2xl text-amber-300"></i>
-          <h3 class="text-lg font-black mt-4">Group Learning</h3>
-          <p class="text-sm text-neutral-400 mt-2">
-            Learn collaboratively and gain perspectives from other professionals.
-          </p>
-        </article>
-      </div>
-
-      <div class="glass rounded-3xl p-6 sm:p-8">
-        <h3 class="text-xl font-black">Looking for a specific resource?</h3>
-        <p class="text-sm text-neutral-400 mt-2">
-          Get in touch with Krista to learn more about available
-          training materials, coaching programs, and learning opportunities.
-        </p>
-        <button onclick="navigate('contact')"
-                class="theme-gradient-bg rounded-xl px-5 py-3 text-sm font-bold mt-5">
-          Contact Krista
-        </button>
-      </div>
-    </section>
-
-    <!-- EVENTS AND PROGRAMS -->
-    <section id="events"
-             class="nav-section max-w-7xl mx-auto px-4 sm:px-6 py-12 space-y-10">
-
-      <div class="text-center">
-        <span class="text-xs font-bold theme-gradient-text uppercase tracking-widest">
-          What's Next?
-        </span>
-        <h2 class="text-3xl sm:text-5xl font-black mt-2">
-          Be Part of Something Bigger
-        </h2>
-        <p class="text-neutral-400 mt-3 max-w-2xl mx-auto">
-          Your growth fuels our mission. Join fellow professionals for
-          learning, reflection, and leadership development.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <article class="glass-card rounded-3xl p-6 flex flex-col justify-between gap-6">
-          <div>
-            <span class="inline-block text-xs font-bold rounded-full
-                         bg-pink-500/10 border border-pink-400/30
-                         px-3 py-2 text-pink-200">
-              Indianapolis
-            </span>
-
-            <h3 class="text-2xl font-black mt-4">Indianapolis Event</h3>
-            <p class="text-sm text-neutral-300 mt-3">
-              An opportunity to learn with fellow leaders and professionals.
-            </p>
-
-            <div class="space-y-3 text-sm text-neutral-300 mt-6">
-              <p><i class="fa-regular fa-calendar text-pink-300 w-6"></i>
-                October 23, 2026</p>
-              <p><i class="fa-regular fa-clock text-pink-300 w-6"></i>
-                9:00 AM – 4:00 PM EST</p>
-              <p><i class="fa-solid fa-ticket text-pink-300 w-6"></i>
-                <strong>$289.00</strong></p>
+    <!-- Topics & Testimonials Split -->
+    <section id="topics" class="section-padding">
+        <div class="container">
+            <div class="row g-5">
+                <!-- Topics -->
+                <div class="col-lg-6 gsap-reveal">
+                    <div class="glass-panel h-100">
+                        <span class="section-subtitle">Training & Leadership</span>
+                        <h2 class="section-title serif mb-4">Core Philosophy</h2>
+                        <ul class="topic-list">
+                            <li><i class="fa-regular fa-lightbulb"></i> <strong>Appreciative Inquiry:</strong> Strengths-based coaching to unlock massive potential.</li>
+                            <li><i class="fa-solid fa-shield-halved"></i> <strong>Imposter Syndrome:</strong> Rewrite narratives to show up with absolute confidence.</li>
+                            <li><i class="fa-solid fa-chart-line"></i> <strong>Efficiency & Productivity:</strong> Build productive routines that support consistent growth.</li>
+                            <li><i class="fa-solid fa-scale-balanced"></i> <strong>Business Growth:</strong> Habits that generate consistent, high-quality leads.</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Testimonials -->
+                <div id="testimonials" class="col-lg-6 gsap-reveal">
+                    <div class="glass-panel h-100 position-relative">
+                        <i class="fa-solid fa-quote-left position-absolute top-0 end-0 m-4 fs-1 text-gold opacity-50"></i>
+                        
+                        <div id="testimonialSlider" class="carousel slide h-100 d-flex flex-column justify-content-center" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                <!-- T1 -->
+                                <div class="carousel-item active">
+                                    <p class="serif fs-5 fst-italic mb-4" style="line-height: 1.6;">"With the proper mindset and accountability, over 90 days I built the muscle of consistency in my daily routine. I tracked my numbers consistently for ALL 90 days! I cannot wait to start Impact 90 again."</p>
+                                    <h6 class="fw-bold mb-0 text-uppercase">Courtney Callahan</h6>
+                                    <small class="text-muted">Impact 90 Participant</small>
+                                </div>
+                                <!-- T2 -->
+                                <div class="carousel-item">
+                                    <p class="serif fs-5 fst-italic mb-4" style="line-height: 1.6;">"Instead of telling and giving advice, I was starting to ask questions... you help them learn how to think for themselves. It has changed the way I coach exponentially."</p>
+                                    <h6 class="fw-bold mb-0 text-uppercase">Amy Greenstein Zimney</h6>
+                                    <small class="text-muted">Coach Development Participant</small>
+                                </div>
+                                <!-- T3 -->
+                                <div class="carousel-item">
+                                    <p class="serif fs-5 fst-italic mb-4" style="line-height: 1.6;">"Learning how to dig deep with those questions has helped me tremendously as a listing agent, as a buyer's agent, as a recruiter, and as a coach. Huge value."</p>
+                                    <h6 class="fw-bold mb-0 text-uppercase">Richard Chung</h6>
+                                    <small class="text-muted">Rainmaker, KW Los Angeles</small>
+                                </div>
+                            </div>
+                            <!-- Controls -->
+                            <div class="mt-4 pt-3 border-top border-white">
+                                <button class="btn btn-sm btn-outline-dark rounded-circle me-2" type="button" data-bs-target="#testimonialSlider" data-bs-slide="prev" style="width:35px; height:35px;">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-dark rounded-circle" type="button" data-bs-target="#testimonialSlider" data-bs-slide="next" style="width:35px; height:35px;">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-
-          <a href="https://pc-forum-in-indianapolis-2026.teachery.co/pc-forum-in-indianapolis-2026"
-             target="_blank"
-             rel="noopener noreferrer"
-             class="theme-gradient-bg w-full py-3 rounded-xl text-sm font-bold text-center">
-            Click to Register
-          </a>
-        </article>
-
-        <article class="glass-card rounded-3xl p-6 flex flex-col justify-between gap-6">
-          <div>
-            <span class="inline-block text-xs font-bold rounded-full
-                         bg-purple-500/10 border border-purple-400/30
-                         px-3 py-2 text-purple-200">
-              June 2027
-            </span>
-
-            <h3 class="text-2xl font-black mt-4">PC Forum Summer Solstice</h3>
-            <p class="text-sm text-neutral-300 mt-3">
-              Recharge, refocus, and return with powerful tools to lead
-              more effectively and coach at a higher level.
-            </p>
-
-            <div class="space-y-3 text-sm text-neutral-300 mt-6">
-              <p><i class="fa-regular fa-calendar text-purple-300 w-6"></i>
-                June 24–25, 2027</p>
-              <p><i class="fa-regular fa-clock text-purple-300 w-6"></i>
-                9:00 AM – 5:00 PM MST</p>
-              <p><i class="fa-solid fa-ticket text-purple-300 w-6"></i>
-                <strong>$599.00</strong></p>
-            </div>
-          </div>
-
-          <a href="https://pc-forum-summer-solstice-2027.teachery.co/pc-forum-summer-solstice-registration"
-             target="_blank"
-             rel="noopener noreferrer"
-             class="theme-gradient-bg w-full py-3 rounded-xl text-sm font-bold text-center">
-            Click to Register
-          </a>
-        </article>
-      </div>
-
-      <div class="glass rounded-3xl p-6 sm:p-8">
-        <h3 class="text-xl font-black">Featured Learning Topics</h3>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
-          <div>
-            <h4 class="font-bold">Appreciative Inquiry</h4>
-            <p class="text-sm text-neutral-400 mt-2 leading-relaxed">
-              Use strengths-based coaching to unlock potential in
-              yourself and those you lead.
-            </p>
-          </div>
-          <div>
-            <h4 class="font-bold">Imposter Syndrome</h4>
-            <p class="text-sm text-neutral-400 mt-2 leading-relaxed">
-              Explore limiting stories and develop a more confident,
-              clear approach to leadership and coaching.
-            </p>
-          </div>
         </div>
-
-        <p class="text-xs text-neutral-500 mt-6">
-          Event details and prices are based on the supplied website content.
-          Contact Krista to confirm availability and registration.
-        </p>
-      </div>
     </section>
 
-    <!-- CONTACT -->
-    <section id="contact"
-             class="nav-section max-w-4xl mx-auto px-4 sm:px-6 py-12 space-y-8">
-
-      <div class="text-center">
-        <span class="text-xs font-bold theme-gradient-text uppercase tracking-widest">
-          Let's Connect
-        </span>
-        <h2 class="text-3xl sm:text-5xl font-black mt-2">
-          Connect With Krista
-        </h2>
-        <p class="text-neutral-400 mt-3">
-          Tell us about your goals, current challenges, or what you want to grow.
-        </p>
-      </div>
-
-      <div class="glass rounded-3xl p-6 sm:p-10">
-        <form id="contact-form"
-              action="https://api.web3forms.com/submit"
-              method="POST"
-              class="space-y-5">
-          <input type="hidden" name="access_key" value="c23172b3-4066-44e9-8331-2aef2370fb63">
-          <input type="hidden" name="subject" value="New contact form message for Krista Staub">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label for="name" class="text-xs font-semibold text-neutral-300 block mb-2">
-                Name
-              </label>
-              <input id="name" name="name" type="text" required
-                     autocomplete="name"
-                     class="w-full bg-black/40 border border-white/10 rounded-xl
-                            px-4 py-3 text-sm focus:outline-none focus:border-pink-500">
+    <!-- Events Section -->
+    <section id="events" class="section-padding">
+        <div class="container">
+            <div class="text-center mb-5 gsap-reveal">
+                <span class="section-subtitle">What's Next?</span>
+                <h2 class="section-title serif">Upcoming Events</h2>
+                <p class="text-muted w-50 mx-auto">Join us live to learn, collaborate, and elevate your professional standards alongside other top-tier leaders.</p>
             </div>
 
-            <div>
-              <label for="email" class="text-xs font-semibold text-neutral-300 block mb-2">
-                Email
-              </label>
-              <input id="email" name="email" type="email" required
-                     autocomplete="email"
-                     class="w-full bg-black/40 border border-white/10 rounded-xl
-                            px-4 py-3 text-sm focus:outline-none focus:border-pink-500">
+            <div class="row justify-content-center g-4">
+                <div class="col-lg-5 gsap-reveal">
+                    <!-- vanilla tilt -->
+                    <div class="glass-card position-relative overflow-hidden" data-tilt data-tilt-max="10" data-tilt-speed="400">
+                        <div class="position-absolute top-0 end-0 bg-dark text-white px-3 py-1 fw-bold" style="border-bottom-left-radius: 10px; font-size: 0.8rem; transform: translateZ(0);">OCT 23, 2026</div>
+                        <h4 class="serif fw-bold mb-2 mt-2">PC Forum in Indianapolis</h4>
+                        <p class="text-muted small mb-4">Learn with fellow leaders. Deep dives into Appreciative Inquiry and overcoming Imposter Syndrome.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-dark fw-bold"><i class="fa-solid fa-tag text-gold me-1"></i> $289.00</span>
+                            <a href="#" class="btn btn-sm btn-outline-dark rounded-pill px-3">Register</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-5 gsap-reveal">
+                    <!-- vanilla tilt -->
+                    <div class="glass-card position-relative overflow-hidden" data-tilt data-tilt-max="10" data-tilt-speed="400" style="border: 1px solid var(--gold-primary);">
+                        <div class="position-absolute top-0 end-0 px-3 py-1 fw-bold text-white" style="background: var(--gold-primary); border-bottom-left-radius: 10px; font-size: 0.8rem; transform: translateZ(0);">JUN 24-25, 2027</div>
+                        <h4 class="serif fw-bold mb-2 mt-2">PC Forum Summer Solstice</h4>
+                        <p class="text-muted small mb-4">Recharge, refocus, and return with powerful tools to lead more effectively and coach at a higher level.</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-dark fw-bold"><i class="fa-solid fa-tag text-gold me-1"></i> $599.00</span>
+                            <a href="#" class="btn btn-sm btn-gold rounded-pill px-3">Register</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-
-          <div>
-            <label for="topic" class="text-xs font-semibold text-neutral-300 block mb-2">
-              What are you interested in?
-            </label>
-            <select id="topic" name="topic"
-                    class="w-full bg-black/40 border border-white/10 rounded-xl
-                           px-4 py-3 text-sm focus:outline-none focus:border-pink-500">
-              <option>1-on-1 Coaching</option>
-              <option>Group Training Programs</option>
-              <option>Trainings and Workshops</option>
-              <option>Impact 90</option>
-              <option>Events and Registration</option>
-              <option>Other Inquiry</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="message" class="text-xs font-semibold text-neutral-300 block mb-2">
-              Message / Goals
-            </label>
-            <textarea id="message" name="message" rows="5" required
-                      class="w-full bg-black/40 border border-white/10 rounded-xl
-                             px-4 py-3 text-sm focus:outline-none focus:border-pink-500"
-                      placeholder="Tell Krista what you would like to achieve..."></textarea>
-          </div>
-
-          <button type="submit"
-                  class="theme-gradient-bg w-full py-4 rounded-xl font-black shadow-lg">
-            Send Message <i class="fa-solid fa-paper-plane ml-2"></i>
-          </button>
-        </form>
-
-        <div id="form-success" class="hidden text-center py-8">
-          <i class="fa-solid fa-circle-check text-4xl text-emerald-400"></i>
-          <h3 class="text-2xl font-black mt-4">Thank You!</h3>
-          <p class="text-sm text-neutral-400 mt-2">
-            Your message has been sent successfully. Krista will be in touch soon.
-          </p>
-          <button onclick="resetContactForm()"
-                  class="mt-5 bg-white/10 rounded-full px-5 py-3 text-sm">
-            Send Another Message
-          </button>
         </div>
-      </div>
     </section>
-  </main>
 
-  <!-- Floating Contact Button -->
-  <button onclick="navigate('contact')"
-          aria-label="Contact Krista"
-          class="fixed bottom-24 lg:bottom-8 right-5 z-40 w-14 h-14
-                 rounded-full theme-gradient-bg shadow-2xl
-                 flex items-center justify-center text-xl">
-    <i class="fa-solid fa-message"></i>
-  </button>
+    <!-- Footer -->
+    <footer class="text-center">
+        <div class="container gsap-reveal">
+            <h2 class="serif fw-bold mb-3">Ready to build momentum?</h2>
+            <p class="text-muted mb-4">If you are ready to elevate what is possible, let's connect.</p>
+            <a href="mailto:contact@kristastaub.com" class="btn-gold text-decoration-none fs-5 px-5 py-3 d-inline-block mb-5">Start The Conversation</a>
+            
+            <div class="d-flex justify-content-center gap-4 mb-4">
+                <a href="#" class="text-dark fs-4"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="#" class="text-dark fs-4"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" class="text-dark fs-4"><i class="fa-brands fa-facebook"></i></a>
+            </div>
+            
+            <p class="text-muted small text-uppercase mb-0" style="letter-spacing: 1px;">&copy; 2026 Krista Staub Coaching • Training • Leadership</p>
+        </div>
+    </footer>
 
-  <!-- Mobile Navigation -->
-  <nav class="lg:hidden fixed bottom-0 inset-x-0 z-50 glass
-              border-t border-white/10 p-2 flex justify-around">
-    <button class="mobile-btn flex flex-col items-center p-2 text-xs"
-            data-target="home" onclick="navigate('home')">
-      <i class="fa-solid fa-house mb-1"></i>Home
-    </button>
-    <button class="mobile-btn flex flex-col items-center p-2 text-xs"
-            data-target="about" onclick="navigate('about')">
-      <i class="fa-solid fa-user mb-1"></i>About
-    </button>
-    <button class="mobile-btn flex flex-col items-center p-2 text-xs"
-            data-target="coaching" onclick="navigate('coaching')">
-      <i class="fa-solid fa-users mb-1"></i>Coaching
-    </button>
-    <button class="mobile-btn flex flex-col items-center p-2 text-xs"
-            data-target="events" onclick="navigate('events')">
-      <i class="fa-solid fa-calendar mb-1"></i>Events
-    </button>
-    <button class="mobile-btn flex flex-col items-center p-2 text-xs"
-            data-target="contact" onclick="navigate('contact')">
-      <i class="fa-solid fa-envelope mb-1"></i>Connect
-    </button>
-  </nav>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Vanilla Tilt for 3D Cards -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
 
-  <footer class="relative z-10 border-t border-white/10 text-center p-8 mb-16 lg:mb-0">
-    <p class="font-bold">Krista Staub</p>
-    <p class="text-xs text-neutral-400 mt-2">Coaching · Training · Leadership</p>
-    <a href="https://ingtrainingnetwork.com"
-       target="_blank" rel="noopener noreferrer"
-       class="inline-block text-xs underline text-neutral-400 mt-3">
-      Visit Krista's website
-    </a>
-  </footer>
+    <!-- Three.js for Highly Visible 3D Aesthetic -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-  <script>
-    // Navigation
-    function navigate(targetId) {
-      const target = document.getElementById(targetId);
-      if (!target) return;
-
-      document.querySelectorAll('.nav-section').forEach(section => {
-        section.classList.remove('active');
-      });
-      target.classList.add('active');
-
-      document.querySelectorAll('.nav-btn').forEach(button => {
-        button.classList.toggle('selected', button.dataset.target === targetId);
-      });
-
-      document.querySelectorAll('.mobile-btn').forEach(button => {
-        const selected = button.dataset.target === targetId;
-        button.classList.toggle('text-pink-400', selected);
-        button.classList.toggle('text-neutral-400', !selected);
-      });
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // Color theme switcher
-    const themes = ['vibrant', 'cosmic', 'emerald'];
-    let currentTheme = 0;
-
-    function toggleTheme() {
-      currentTheme = (currentTheme + 1) % themes.length;
-      document.body.dataset.theme = themes[currentTheme];
-      showToast('Theme: ' + themes[currentTheme]);
-    }
-
-    // Toast notification
-    let toastTimer;
-
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      document.getElementById('toast-message').textContent = message;
-
-      toast.classList.remove('hidden');
-      clearTimeout(toastTimer);
-
-      toastTimer = setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 2800);
-    }
-
-    // Before/after slider
-    const range = document.getElementById('comparison-range');
-    const beforePanel = document.getElementById('comparison-before');
-    const handle = document.getElementById('comparison-handle');
-
-    function updateComparison() {
-      const value = Number(range.value);
-      beforePanel.style.width = value + '%';
-      handle.style.left = value + '%';
-    }
-
-    range.addEventListener('input', updateComparison);
-
-    // Make the comparison draggable directly
-    const comparison = document.getElementById('comparison');
-    let dragging = false;
-
-    function setSliderFromPointer(clientX) {
-      const rect = comparison.getBoundingClientRect();
-      const value = Math.max(
-        0,
-        Math.min(100, ((clientX - rect.left) / rect.width) * 100)
-      );
-
-      range.value = value;
-      updateComparison();
-    }
-
-    comparison.addEventListener('pointerdown', event => {
-      dragging = true;
-      comparison.setPointerCapture(event.pointerId);
-      setSliderFromPointer(event.clientX);
-    });
-
-    comparison.addEventListener('pointermove', event => {
-      if (dragging) setSliderFromPointer(event.clientX);
-    });
-
-    comparison.addEventListener('pointerup', () => dragging = false);
-    comparison.addEventListener('pointercancel', () => dragging = false);
-
-    const contactForm = document.getElementById('contact-form');
-    const submitButton = contactForm.querySelector('button[type="submit"]');
-
-    contactForm.addEventListener('submit', async event => {
-      event.preventDefault();
-      submitButton.disabled = true;
-      submitButton.innerHTML = 'Sending... <i class="fa-solid fa-spinner fa-spin ml-2"></i>';
-
-      try {
-        const response = await fetch(contactForm.action, {
-          method: contactForm.method,
-          body: new FormData(contactForm),
-          headers: { Accept: 'application/json' }
+    <script>
+        // --- 1. GSAP Scroll Animations ---
+        gsap.registerPlugin(ScrollTrigger);
+        
+        document.querySelectorAll(".gsap-reveal").forEach((elem) => {
+            gsap.to(elem, {
+                scrollTrigger: {
+                    trigger: elem,
+                    start: "top 85%",
+                    toggleActions: "play none none reverse"
+                },
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                ease: "power3.out"
+            });
         });
-        const result = await response.json();
 
-        if (!response.ok || !result.success) {
-          throw new Error(result.message || 'Unable to send your message.');
-        }
+        // --- 2. BOLD & VISIBLE 3D THREE.JS SCENE ---
+        // Represents "Real Estate" (Buildings) and "Growth" (Floating shapes)
+        
+        const initThreeJS = () => {
+            const container = document.getElementById('canvas-container');
+            
+            // Scene Setup - Pure Pearl White Background
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color('#FAF9F6');
+            scene.fog = new THREE.FogExp2('#FAF9F6', 0.012);
 
-        contactForm.classList.add('hidden');
-        document.getElementById('form-success').classList.remove('hidden');
-        showToast('Message sent successfully');
-      } catch (error) {
-        showToast(error.message);
-      } finally {
-        submitButton.disabled = false;
-        submitButton.innerHTML = 'Send Message <i class="fa-solid fa-paper-plane ml-2"></i>';
-      }
-    });
+            // Camera Setup
+            const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 45); // Pulled back to see more of the models
 
-    function resetContactForm() {
-      contactForm.reset();
-      contactForm.classList.remove('hidden');
-      document.getElementById('form-success').classList.add('hidden');
-    }
+            // Renderer Setup
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); 
+            
+            // Enable shadows for depth
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
 
-    // Initial state
-    navigate('home');
-    updateComparison();
-  </script>
+            // Lighting (Crucial for Gloss/Metallic Look)
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); 
+            scene.add(ambientLight);
+
+            // Warm gold directional light
+            const dirLight = new THREE.DirectionalLight(0xffeedd, 1.5); 
+            dirLight.position.set(20, 30, 15);
+            dirLight.castShadow = true;
+            dirLight.shadow.mapSize.width = 1024;
+            dirLight.shadow.mapSize.height = 1024;
+            scene.add(dirLight);
+
+            // Cool rim light for material contrast
+            const rimLight = new THREE.PointLight(0xffffff, 1.2, 100);
+            rimLight.position.set(-20, 10, -20);
+            scene.add(rimLight);
+
+            // Master Group to rotate based on mouse
+            const masterGroup = new THREE.Group();
+            scene.add(masterGroup);
+
+            // --- PREMIUM MATERIALS ---
+            // 1. Glossy White Architectural Material
+            const buildingMat = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                metalness: 0.1,
+                roughness: 0.1, // Highly glossy
+            });
+
+            // 2. Metallic Champagne Gold Material
+            const goldMat = new THREE.MeshStandardMaterial({
+                color: 0xd4af37,
+                metalness: 0.9,
+                roughness: 0.2,
+            });
+
+            // --- CREATE REAL ESTATE CITYSCAPE ---
+            const cityGroup = new THREE.Group();
+            const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+            
+            // Generate stylish geometric "buildings"
+            for (let i = 0; i < 60; i++) {
+                // 15% chance to be gold
+                const isGold = Math.random() > 0.85; 
+                const mesh = new THREE.Mesh(boxGeo, isGold ? goldMat : buildingMat);
+                
+                // Spread out in a large circle
+                const angle = Math.random() * Math.PI * 2;
+                const radius = Math.random() * 25;
+                mesh.position.x = Math.cos(angle) * radius;
+                mesh.position.z = Math.sin(angle) * radius;
+                
+                // Random height (momentum)
+                const height = Math.random() * 12 + 2; 
+                mesh.scale.set(1.5, height, 1.5);
+                mesh.position.y = height / 2 - 8; // Anchor bottoms
+
+                mesh.castShadow = true;
+                mesh.receiveShadow = true;
+                
+                cityGroup.add(mesh);
+            }
+            masterGroup.add(cityGroup);
+
+            // --- CREATE FLOATING GROWTH/MOMENTUM SHAPES ---
+            const floatingShapes = [];
+            const octaGeo = new THREE.OctahedronGeometry(1);
+            const coneGeo = new THREE.ConeGeometry(1, 2, 4);
+
+            for (let i = 0; i < 20; i++) {
+                const geo = Math.random() > 0.5 ? octaGeo : coneGeo;
+                const shape = new THREE.Mesh(geo, goldMat);
+                
+                // Position randomly in the air above the buildings
+                shape.position.set(
+                    (Math.random() - 0.5) * 40,
+                    Math.random() * 20 + 2,
+                    (Math.random() - 0.5) * 30
+                );
+                
+                shape.scale.setScalar(Math.random() * 0.8 + 0.4);
+                shape.castShadow = true;
+
+                masterGroup.add(shape);
+                
+                // Store data for animation loop
+                floatingShapes.push({
+                    mesh: shape,
+                    speedY: Math.random() * 0.01 + 0.005,
+                    speedRot: Math.random() * 0.02 + 0.01,
+                    offset: Math.random() * Math.PI * 2
+                });
+            }
+
+            // --- MOUSE INTERACTION ---
+            let targetRotationX = 0;
+            let targetRotationY = 0;
+            let mouseX = 0;
+            let mouseY = 0;
+
+            const windowHalfX = window.innerWidth / 2;
+            const windowHalfY = window.innerHeight / 2;
+
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX - windowHalfX) * 0.0005;
+                mouseY = (event.clientY - windowHalfY) * 0.0005;
+                targetRotationY = mouseX;
+                targetRotationX = mouseY;
+            });
+
+            // --- ANIMATION LOOP ---
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const time = clock.getElapsedTime();
+
+                // 1. Smoothly interpolate master group rotation based on mouse
+                masterGroup.rotation.y += (targetRotationY - masterGroup.rotation.y) * 0.05;
+                masterGroup.rotation.x += (targetRotationX - masterGroup.rotation.x) * 0.05;
+
+                // 2. Slow base rotation for ambient motion
+                cityGroup.rotation.y = time * 0.03;
+
+                // 3. Animate floating shapes
+                floatingShapes.forEach((obj) => {
+                    obj.mesh.rotation.y += obj.speedRot;
+                    obj.mesh.rotation.x += obj.speedRot * 0.5;
+                    // Hover effect
+                    obj.mesh.position.y += Math.sin(time + obj.offset) * 0.02;
+                });
+
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+
+            // Handle Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        };
+
+        // Initialize 3D scene when DOM is ready
+        window.addEventListener('DOMContentLoaded', initThreeJS);
+
+    </script>
 </body>
 </html>
